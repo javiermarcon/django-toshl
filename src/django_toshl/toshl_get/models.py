@@ -9,26 +9,27 @@ from .model_choices import (ACCOUNT_STATUSES, ACCOUNT_TYPES, CURRENCY_TYPES, IMA
 # Create your models here.
 
 class CurrencyElement(models.Model):
+    code = models.CharField(max_length=10, primary_key=True)
     modified = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
     precision = models.IntegerField() # 0-9
-    symbol = models.CharField(max_length=100)
+    symbol = models.CharField(max_length=10)
     type = models.CharField(max_length=20, choices=CURRENCY_TYPES)
 
 
 class Image(models.Model):
-    deleted = models.BooleanField()
-    filename = models.CharField(max_length=100)
+    deleted = models.BooleanField(blank=True, null=True)
+    filename = models.CharField(max_length=100, blank=True, null=True)
     id = models.IntegerField(primary_key=True)
-    path = models.CharField(max_length=100)
+    path = models.CharField(max_length=100, blank=True, null=True)
     status = models.CharField(max_length=20, choices=IMAGE_STATUSES)
-    type = models.CharField(max_length=100)
+    type = models.CharField(max_length=100, blank=True, null=True)
 
 
 class Notification(models.Model):
     action = models.CharField(max_length=100)
     date = models. DateTimeField()
-    deleted = models.BooleanField()
+    deleted = models.BooleanField(blank=True, null=True)
     id = models.IntegerField(primary_key=True)
     modified = models.CharField(max_length=100)
     text = models.CharField(max_length=100)
@@ -47,7 +48,7 @@ class EntryRepeat(models.Model):
     interval = models.IntegerField() # required=True min 1 max 255
     iteration = models.IntegerField() # min 0
     start = models.DateField() # required=True)
-    template = models.BooleanField()
+    template = models.BooleanField(blank=True, null=True)
     template_end = models.DateField()
     template_start = models.DateField()
     type = models.CharField(max_length=20, choices=ENTRIES_REPEAT_TYPES)
@@ -59,22 +60,22 @@ class AccountAvg(models.Model):
 
 
 class AccountBilling(models.Model):
-    byday = models.CharField(max_length=100)
-    bymonthday = models.CharField(max_length=100)
-    bysetpos = models.CharField(max_length=100)
+    byday = models.CharField(max_length=100, blank=True, null=True)
+    bymonthday = models.CharField(max_length=100, blank=True, null=True)
+    bysetpos = models.CharField(max_length=100, blank=True, null=True)
 
 
 class AccountConnection(models.Model):
     id = models.IntegerField(primary_key=True)
-    logo = models.CharField(max_length=100)
+    logo = models.CharField(max_length=100, blank=True, null=True)
     name = models.CharField(max_length=100)
     status = models.CharField(max_length=20, choices=ACCOUNT_CONNECTION_STATUSES)
 
 
 class Currency(models.Model):
-    code = models.CharField(max_length=10) # pattern='[A-Z_]{2,10}')
+    code = models.ForeignKey(CurrencyElement, primary_key=True, on_delete=models.CASCADE) # CharField(max_length=10) # pattern='[A-Z_]{2,10}')
     fixed = models.BooleanField(default=False)
-    main_rate = models.FloatField()
+    main_rate = models.FloatField(blank=True, null=True)
     rate = models.FloatField()
 
 
@@ -90,9 +91,9 @@ class AccountGoal(models.Model):
 
 
 class AccountSettle(models.Model):
-    byday = models.CharField(max_length=100)
-    bymonthday = models.CharField(max_length=100)
-    bysetpos = models.CharField(max_length=100)
+    byday = models.CharField(max_length=100, blank=True, null=True)
+    bymonthday = models.CharField(max_length=100, blank=True, null=True)
+    bysetpos = models.CharField(max_length=100, blank=True, null=True)
 
 
 class Account(models.Model):
@@ -104,18 +105,18 @@ class Account(models.Model):
     count = models.IntegerField()
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     daily_sum_median = models.ForeignKey(AccountMedian, on_delete=models.CASCADE, blank=True, null=True)
-    deleted = models.BooleanField()
-    extra = models.CharField(max_length=4096)
+    deleted = models.BooleanField(blank=True, null=True)
+    extra = models.CharField(max_length=4096, blank=True, null=True)
     goal = models.ForeignKey(AccountGoal, on_delete=models.CASCADE, blank=True, null=True)
     initial_balance = models.FloatField()
-    limit = models.FloatField()
+    limit = models.FloatField(blank=True, null=True)
     modified = models. DateTimeField()
     name = models.CharField(max_length=100)
-    name_override = models.BooleanField()
+    name_override = models.BooleanField(blank=True, null=True)
     order = models.IntegerField()
-    parent = models.CharField(max_length=100)
-    recalculated = models.BooleanField()
-    review = models.IntegerField()
+    parent = models.CharField(max_length=100, blank=True, null=True)
+    recalculated = models.BooleanField(blank=True, null=True)
+    review = models.IntegerField(blank=True, null=True)
     settle = models.ForeignKey(AccountSettle, on_delete=models.CASCADE, blank=True, null=True)
     status = models.CharField(max_length=10, choices=ACCOUNT_STATUSES)
     type = models.CharField(max_length=20, choices=ACCOUNT_TYPES)
@@ -148,14 +149,14 @@ class Budget(models.Model):
     amount = models.FloatField()
     categories = models.ManyToManyField('Category', related_name='budget_categories', blank=True)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
-    deleted = models.BooleanField()
+    deleted = models.BooleanField(blank=True, null=True)
     delta = models.FloatField()
-    extra = models.CharField(max_length=4096)
+    extra = models.CharField(max_length=4096, blank=True, null=True)
     froma = models.DateField()
     history_amount_median = models.FloatField()
     id = models.IntegerField(primary_key=True)
-    limit = models.FloatField()
-    limit_planned = models.FloatField()
+    limit = models.FloatField(blank=True, null=True)
+    limit_planned = models.FloatField(blank=True, null=True)
     modified = models.CharField(max_length=100)
     name = models.CharField(max_length=300)
     order = models.IntegerField() # minimum=0, maximum=255))
@@ -163,12 +164,12 @@ class Budget(models.Model):
     percent = models.FloatField()
     planned = models.FloatField()
     problem = models.ForeignKey(BudgetProblem, on_delete=models.CASCADE, blank=True, null=True)
-    recalculated = models.BooleanField()
+    recalculated = models.BooleanField(blank=True, null=True)
     recurrence = models.ForeignKey(Recurrence, on_delete=models.CASCADE, blank=True, null=True)
-    rollover = models.BooleanField(default=False)
+    rollover = models.BooleanField(default=False, blank=True, null=True)
     rollover_amount = models.FloatField(default=0)
     rollover_amount_planned = models.FloatField(default=0)
-    rollover_override = models.BooleanField(default=False)
+    rollover_override = models.BooleanField(default=False, blank=True, null=True)
     status = models.CharField(max_length=20, choices=BUDGET_STATUSES)
     tags = models.ManyToManyField('Tag', related_name='budget_tags', blank=True)
     to = models.DateField()
@@ -176,26 +177,26 @@ class Budget(models.Model):
 
 
 class CategoryCounts(models.Model):
-    budgets = models.IntegerField()
-    entries = models.IntegerField()
-    expense_entries = models.IntegerField()
-    expense_tags = models.IntegerField()
-    expense_tags_used_with_category = models.IntegerField()
-    income_entries = models.IntegerField()
-    income_tags = models.IntegerField()
-    income_tags_used_with_category = models.IntegerField()
-    tags = models.IntegerField()
-    tags_used_with_category = models.IntegerField()
+    budgets = models.IntegerField(blank=True, null=True)
+    entries = models.IntegerField(blank=True, null=True)
+    expense_entries = models.IntegerField(blank=True, null=True)
+    expense_tags = models.IntegerField(blank=True, null=True)
+    expense_tags_used_with_category = models.IntegerField(blank=True, null=True)
+    income_entries = models.IntegerField(blank=True, null=True)
+    income_tags = models.IntegerField(blank=True, null=True)
+    income_tags_used_with_category = models.IntegerField(blank=True, null=True)
+    tags = models.IntegerField(blank=True, null=True)
+    tags_used_with_category = models.IntegerField(blank=True, null=True)
 
 
 class Category(models.Model):
     counts = models.ForeignKey(CategoryCounts, on_delete=models.CASCADE, blank=True, null=True)
-    deleted = models.BooleanField()
-    extra = models.CharField(max_length=4096)
+    deleted = models.BooleanField(blank=True, null=True)
+    extra = models.CharField(max_length=4096, blank=True, null=True)
     id = models.IntegerField(primary_key=True)
     modified = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
-    name_override = models.BooleanField(default=False)
+    name_override = models.BooleanField(default=False, blank=True, null=True)
     type = models.CharField(max_length=20, choices=CATEGORY_TYPES)
 
 
@@ -231,7 +232,7 @@ class EntryImport(models.Model):
     id = models.IntegerField(primary_key=True)
     memo = models.CharField(max_length=100)
     payee = models.CharField(max_length=100)
-    pending = models.BooleanField()
+    pending = models.BooleanField(blank=True, null=True)
 
 
 class EntryLocation(models.Model):
@@ -248,7 +249,7 @@ class Reminder(models.Model):
 
 
 class EntryReview(models.Model):
-    completed = models.BooleanField()
+    completed = models.BooleanField(blank=True, null=True)
     id = models.IntegerField(primary_key=True)
     type = models.CharField(max_length=20, choices=ENTRY_REVIEW_TYPES)
 
@@ -268,13 +269,13 @@ class Entry(models.Model):
     account = models.CharField(max_length=100)
     amount = models.FloatField()
     category = models.CharField(max_length=100)
-    completed = models.BooleanField(default=False)
+    completed = models.BooleanField(default=False, blank=True, null=True)
     created = models. DateTimeField()
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     date = models.DateField()
-    deleted = models.BooleanField()
+    deleted = models.BooleanField(blank=True, null=True)
     desc = models.CharField(max_length=3072)
-    extra = models.CharField(max_length=4096)
+    extra = models.CharField(max_length=4096, blank=True, null=True)
     id = models.IntegerField(primary_key=True)
     images = models.ManyToManyField('Image', related_name='entry_images', blank=True)
     importar = models.ForeignKey(EntryImport, on_delete=models.CASCADE, blank=True, null=True)
@@ -342,7 +343,7 @@ class Day(models.Model):
 #     locations: Maybe[List[str]] = Property(Array(String(), uniqueItems=True))
 #     modified = models.CharField(max_length=100)
 #     resources: Maybe[List[str]] = Property(Array(String(enum=['expenses', 'incomes', 'budgets', 'summary', 'attachments', 'attachments_grid', 'balances']), additionalItems=False, uniqueItems=True))
-#     seen = models.BooleanField()
+#     seen = models.BooleanField(blank=True, null=True)
 #     status = models.CharField(max_length=20, choices=['sending', 'sent', 'error', 'generating', 'generated']))
 #     tags: Maybe[List[str]] = Property(Array(String(), uniqueItems=True))
 #     to = models.DateField()
@@ -371,7 +372,7 @@ class Location(models.Model):
     longitude = models.FloatField()
     modified = models.CharField(max_length=100)
     name = models.CharField(max_length=255)
-    used = models.BooleanField()
+    used = models.BooleanField(blank=True, null=True)
     venue_id = models.CharField(max_length=100)
     visits = models.IntegerField() # minimum=0))
 
@@ -385,13 +386,13 @@ class TagCounts(models.Model):
 class Tag(models.Model):
     category = models.CharField(max_length=100)
     counts = models.ForeignKey(TagCounts, on_delete=models.CASCADE, blank=True, null=True)
-    deleted = models.BooleanField()
-    extra = models.CharField(max_length=4096)
+    deleted = models.BooleanField(blank=True, null=True)
+    extra = models.CharField(max_length=4096, blank=True, null=True)
     id = models.IntegerField(primary_key=True)
-    meta_tag = models.BooleanField()
+    meta_tag = models.BooleanField(blank=True, null=True)
     modified = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
-    name_override = models.BooleanField(default=False)
+    name_override = models.BooleanField(default=False, blank=True, null=True)
     type = models.CharField(max_length=20, choices=TAG_TYPES)
 
 
@@ -416,7 +417,7 @@ class TagSum(models.Model):
 
 class CustomCurrency(models.Model):
     code = models.CharField(max_length=100) # pattern='[A-Z_]{2,10}'))
-    fixed = models.BooleanField(default='false')
+    fixed = models.BooleanField(default='false', blank=True, null=True)
     rate = models.FloatField()
     reference_currency = models.CharField(max_length=100) # pattern='[A-Z_]{2,10}'))
 
@@ -426,27 +427,27 @@ class UserCurrency(models.Model):
     custom_exchange_rate = models.FloatField()
     main = models.CharField(max_length=100) # pattern='[A-Z_]{2,10}'))
     update = models.CharField(max_length=20, choices=USER_CURRENCY_UPDATES)
-    update_accounts = models.BooleanField()
+    update_accounts = models.BooleanField(blank=True, null=True)
 
 
 class UserLimits(models.Model):
-    accounts = models.BooleanField()
-    bank = models.BooleanField()
-    budgets = models.BooleanField()
-    export = models.BooleanField()
-    images = models.BooleanField()
-    importar = models.BooleanField() # source='import')
-    locations = models.BooleanField()
-    passcode = models.BooleanField()
-    planning = models.BooleanField()
-    pro_share = models.BooleanField()
-    reminders = models.BooleanField()
-    repeats = models.BooleanField()
+    accounts = models.BooleanField(blank=True, null=True)
+    bank = models.BooleanField(blank=True, null=True)
+    budgets = models.BooleanField(blank=True, null=True)
+    export = models.BooleanField(blank=True, null=True)
+    images = models.BooleanField(blank=True, null=True)
+    importar = models.BooleanField(blank=True, null=True) # source='import')
+    locations = models.BooleanField(blank=True, null=True)
+    passcode = models.BooleanField(blank=True, null=True)
+    planning = models.BooleanField(blank=True, null=True)
+    pro_share = models.BooleanField(blank=True, null=True)
+    reminders = models.BooleanField(blank=True, null=True)
+    repeats = models.BooleanField(blank=True, null=True)
 
 
 class UserMigration(models.Model):
     date_migrated = models. DateTimeField()
-    finished = models.BooleanField()
+    finished = models.BooleanField(blank=True, null=True)
     revert_until = models. DateTimeField()
 
 
@@ -493,7 +494,7 @@ class ToshlUser(models.Model):
     country = models.CharField(max_length=100) # pattern='[A-Z]{2}'))
     currency = models.ForeignKey(UserCurrency, on_delete=models.CASCADE, blank=True, null=True)
     email = models.CharField(max_length=100) # format='email', maxLength=254))
-    extra = models.CharField(max_length=4096)
+    extra = models.CharField(max_length=4096, blank=True, null=True)
     first_name = models.CharField(max_length=100)
     #flags: Maybe[List[str]] = Property(Array(String()))
     id = models.IntegerField(primary_key=True)
@@ -505,10 +506,10 @@ class ToshlUser(models.Model):
     #migration: Maybe[UserMigration] = Property(UserMigration)
     modified = models.CharField(max_length=100)
     notifications = models.IntegerField()
-    otp_enabled = models.BooleanField()
+    otp_enabled = models.BooleanField(blank=True, null=True)
     # pro: Maybe[UserPro] = Property(UserPro)
     # social: Maybe[List[str]] = Property(Array(String(enum=['toshl', 'google', 'facebook', 'twitter', 'evernote', 'foursquare', 'etalio', 'flickr', 'apple']), additionalItems=False, uniqueItems=True))
     start_day = models.IntegerField(default=1) #, minimum=1, maximum=31))
     # steps: Maybe[List[str]] = Property(Array(String(enum=['income', 'expense', 'budget', 'budget_category']), additionalItems=False, uniqueItems=True))
     timezone = models.CharField(max_length=100)
-    trial_eligible = models.BooleanField(default=False)
+    trial_eligible = models.BooleanField(default=False, blank=True, null=True)
