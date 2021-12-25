@@ -95,7 +95,7 @@ class EntriesProcessor(object):
                 fldValue = getattr(dataObject, field.name)
                 if str(fldValue) == 'NotPassed':
                     return
-                print((fldValue, field, "m2m_key"))
+                #print((fldValue, field, "m2m_key"))
                 (relatedModel, relatedModelFields, relatedPrimary) = self.get_related(field)
                 searchId = '{}__in'.format(relatedPrimary)
                 searchParam = {searchId: fldValue}
@@ -140,10 +140,10 @@ class EntriesProcessor(object):
             for field in fields:
                 fldValue = self.process_field(field, params, entry, primary)
                 values[field.name] = fldValue
-                print((field.name, fldValue))
+                #print((field.name, fldValue))
             if pkValue:
                 values[primary] = pkValue
-            print(values)
+            #print(values)
             ups = self.upsert_record(self.actionClases[action], values, primary)
             for field in m2m_fields:
                 fldValue = self.process_m2m_field(field, entry, ups)
@@ -184,37 +184,43 @@ class EntriesProcessor(object):
             res = self.process_list_entries(entries, action, queryset, fields, primary, m2m_fields)
         elif isinstance(entries, dict):
             res = self.process_dict_entries(entries, action, queryset, fields, primary, m2m_fields)
-        print(res)
+        #print(res)
 
         return
 
+def render_imported(request):
+    ''' Imports the accounts'''
+    return render(request, "toshl_get/data_imported.html")
+
+def do_processing(actions, params=None):
+    ''' performs the processing of the updates'''
+    results = []
+    processor = EntriesProcessor()
+    if not params:
+        params = [None] * len(actions)
+    for action, param in zip(actions, params):
+        print("processing_{}".format(action))
+        results.append(processor.update_records(action, param))
+    return results
+
+def process_and_render(request, actions, params=None):
+    _ = do_processing(actions, params)
+    return render_imported(request)
+
 def accounts_import(request):
     ''' Imports the accounts'''
-    processor = EntriesProcessor()
-    print("processing_currencies")
-    res = processor.update_records('currencies')
-    print("processing_accounts")
-    res = processor.update_records('accounts')
-    return render(request, "toshl_get/data_imported.html")
-
+    actions = ['currencies', 'accounts']
+    return process_and_render(request, actions)
 
 def tags_import(request):
-    ''' Imports the accounts'''
-    processor = EntriesProcessor()
-    print("processing_categories")
-    res = processor.update_records('categories')
-    # print("processing_tags")
-    res = processor.update_records('tags')
-    return render(request, "toshl_get/data_imported.html")
-
+    ''' Imports the tags'''
+    actions = ['categories', 'tags']
+    return process_and_render(request, actions)
 
 def transactions_import(request):
-    ''' Imports the accounts'''
-    processor = EntriesProcessor()
-    print("processing_entries")
-    params = {'from_': '2000-01-01', 'to': '2022-12-01'}
-    res = processor.update_records('entries', params)
-    return render(request, "toshl_get/data_imported.html")
+    ''' Imports the transactions'''
+    params = [{'from_': '2000-01-01', 'to': '2022-12-01'}]
+    return process_and_render(request, ['entries'], params)
 
 
 """
