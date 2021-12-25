@@ -222,6 +222,12 @@ def transactions_import(request):
     params = [{'from_': '2000-01-01', 'to': '2022-12-01'}]
     return process_and_render(request, ['entries'], params)
 
+def all_import(request):
+    ''' Imports the accounts, tags and transactions'''
+    actions = ['currencies', 'accounts', 'categories', 'tags', 'entries']
+    transaction_params = {'from_': '2000-01-01', 'to': '2022-12-01'}
+    params = [None, None, None, None, transaction_params]
+    return process_and_render(request, actions, params)
 
 """
 from django.db.models import Count, Max
