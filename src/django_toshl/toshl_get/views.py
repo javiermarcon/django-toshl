@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.db import models
 from django.conf import settings
+#from django.utils.timezone import make_aware
 import toshling
 import datetime
+from dateutil import tz
 import six
 from dateutil.parser import parse
 from .models import (Account, AccountAvg, AccountBilling, AccountConnection, Currency, AccountMedian, AccountGoal,
@@ -132,8 +134,12 @@ class EntriesProcessor(object):
         elif isinstance(field, (models.ForeignKey, models.OneToOneField)):
             fldValue = self.process_foreign_key_field(field, fldValue)
         elif isinstance(field, models.DateTimeField) and isinstance(fldValue, six.string_types):
-            fldValue = parse(str(fldValue)) #.split('.')[0],
-            #                                      '%Y-%m-%d %H:%M:%S').replace(tzinfo=datetime.timezone.utc)
+            timezone = tz.gettz(settings.TIME_ZONE)
+            fldValue = parse(str(fldValue))
+            fldValue = fldValue.replace(tzinfo=fldValue.tzinfo or timezone)
+            #if isinstance(fldValue, datetime.datetime):
+            #    fldValue = make_aware(fldValue)
+            # str(fldValue).split('.')[0], '%Y-%m-%d %H:%M:%S').replace(tzinfo=datetime.timezone.utc)
         return fldValue
 
     def process_field(self, field, params, entry, primary):
