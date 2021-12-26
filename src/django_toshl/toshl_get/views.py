@@ -157,7 +157,7 @@ class EntriesProcessor(object):
             fld = str(field)
             if fld not in self.unknown_fields:
                 self.unknown_fields[fld] = entry
-            pdb.set_trace()
+            #pdb.set_trace()
 
     def process_fields(self, entry, action, queryset, fields, params, primary, m2m_fields, pkValue = None):
         try:
@@ -165,7 +165,7 @@ class EntriesProcessor(object):
             values = {}
             if pkValue:
                 values[primary] = pkValue
-                fields.pop(primary)
+                fields = [ x for x in fields if x.name != primary] #.pop(primary)
             for field in fields:
                 fldValue = self.process_field(field, params, entry, primary)
                 values[field.name] = fldValue
@@ -179,6 +179,7 @@ class EntriesProcessor(object):
             print(e)
             import traceback
             traceback.print_exc()
+            #pdb.set_trace()
 
     def process_list_entries(self, entries, action, queryset, fields, primary, m2m_fields):
         params = dir(entries[0])
@@ -214,10 +215,10 @@ class EntriesProcessor(object):
         elif isinstance(entries, dict):
             res = self.process_dict_entries(entries, action, queryset, fields, primary, m2m_fields)
         #print(res)
-        print('review_unknown')
-        pprint.pprint(self.unknown_fields)
         if self.unknown_fields:
-            pdb.set_trace()
+            print('review_unknown')
+            pprint.pprint(self.unknown_fields)
+            #pdb.set_trace()
         return
 
 def render_imported(request):
