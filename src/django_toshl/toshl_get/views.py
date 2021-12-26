@@ -6,8 +6,10 @@ import datetime
 import six
 from dateutil.parser import parse
 from .models import (Account, AccountAvg, AccountBilling, AccountConnection, Currency, AccountMedian, AccountGoal,
-                     AccountSettle, CurrencyElement, Category, Tag, CategoryCounts, TagCounts, Entry)
-
+                     AccountSettle, CurrencyElement, Category, Tag, CategoryCounts, TagCounts, Entry, EntryImport,
+                     EntryReview, EntryTransaction)
+import pprint
+import pdb
 # Create your views here.
 
 
@@ -21,9 +23,20 @@ class EntriesProcessor(object):
                     'tags': Tag,
                     'entries': Entry,
                     }
+    fieldExceptions = {'import_': 'importar'}
+    unknown_fields = {}
 
     def __init__(self):
         self.get_toshl_client()
+        self.reversedFieldExceptions = dict((v, k) for k, v in self.fieldExceptions.items())
+
+    def excepted_params(self, params):
+        newParams = params.copy()
+        for index, item in enumerate(newParams):
+            if item in self.fieldExceptions:
+                newParams[index] = self.fieldExceptions[item]
+        return newParams
+
 
     def check_values(self, record, data, primary):
         # check if we only have the pk just to get the object
@@ -41,7 +54,7 @@ class EntriesProcessor(object):
 
     def upsert_record(self, modelName, data, primary):
         obj = None
-        print(("upserting", modelName, data, primary))
+        # print(("upserting", modelName, data, primary))
         # import pdb; pdb.set_trace()
         queryset = self.get_queryset(modelName, primary)
         if primary in data and data[primary] in queryset:
@@ -66,13 +79,16 @@ class EntriesProcessor(object):
         return [fld.name for fld in fields if hasattr(fld, 'primary_key') and fld.primary_key][0]
 
     def get_related(self, field):
-        relatedModel = globals()[field.related_model.__name__]
+        relatedName = field.related_model.__name__
+        #if relatedName not in globals():
+        #    pdb.set_trace()
+        relatedModel = globals()[relatedName]
         relatedModelFields = self.get_fields(relatedModel)
         relatedPrimary = self.get_primary(relatedModelFields)
         return (relatedModel, relatedModelFields, relatedPrimary)
 
     def process_foreign_key_field(self, field, fldValue):
-        print((fldValue, field, "foreign_key"))
+        #print((fldValue, field, "foreign_key"))
         # import pdb;pdb.set_trace()
         (relatedModel, relatedModelFields, relatedPrimary) = self.get_related(field)
         # related_params = dir(fldValue)
@@ -121,28 +137,33 @@ class EntriesProcessor(object):
         return fldValue
 
     def process_field(self, field, params, entry, primary):
-        if field.name in params and hasattr(entry, field.name):
-            # import pdb;pdb.set_trace()
-            fldValue = getattr(entry, field.name)
+        newParams = self.excepted_params(params)
+        if field.name in newParams:
+            if hasattr(entry, field.name):
+                # import pdb;pdb.set_trace()
+                fldValue = getattr(entry, field.name)
+            else:
+                fldValue = getattr(entry, self.reversedFieldExceptions[field.name])
+                if fldValue != 'NotPassed':
+                    pdb.set_trace()
             return self.process_fldValue(fldValue, field)
         else:
-            print("-------nd value----")
-            print(field)
-            print(entry)
-            print(primary)
-            print("-------nd value----")
-            # import pdb; pdb.set_trace()
+            fld = str(field)
+            if fld not in self.unknown_fields:
+                self.unknown_fields[fld] = entry
+            pdb.set_trace()
 
     def process_fields(self, entry, action, queryset, fields, params, primary, m2m_fields, pkValue = None):
         try:
             #import pdb; pdb.set_trace()
             values = {}
+            if pkValue:
+                values[primary] = pkValue
+                fields.pop(primary)
             for field in fields:
                 fldValue = self.process_field(field, params, entry, primary)
                 values[field.name] = fldValue
                 #print((field.name, fldValue))
-            if pkValue:
-                values[primary] = pkValue
             #print(values)
             ups = self.upsert_record(self.actionClases[action], values, primary)
             for field in m2m_fields:
@@ -150,6 +171,8 @@ class EntriesProcessor(object):
             return ups
         except Exception as e:
             print(e)
+            import traceback
+            traceback.print_exc()
 
     def process_list_entries(self, entries, action, queryset, fields, primary, m2m_fields):
         params = dir(entries[0])
@@ -185,7 +208,10 @@ class EntriesProcessor(object):
         elif isinstance(entries, dict):
             res = self.process_dict_entries(entries, action, queryset, fields, primary, m2m_fields)
         #print(res)
-
+        print('review_unknown')
+        pprint.pprint(self.unknown_fields)
+        if self.unknown_fields:
+            pdb.set_trace()
         return
 
 def render_imported(request):

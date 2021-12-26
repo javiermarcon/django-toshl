@@ -228,10 +228,10 @@ class EntryImage(models.Model):
 
 
 class EntryImport(models.Model):
-    connection = models.CharField(max_length=100)
+    connection = models.CharField(max_length=100, blank=True, null=True)
     id = models.IntegerField(primary_key=True)
-    memo = models.CharField(max_length=100)
-    payee = models.CharField(max_length=100)
+    memo = models.CharField(max_length=100, blank=True, null=True)
+    payee = models.CharField(max_length=100, blank=True, null=True)
     pending = models.BooleanField(blank=True, null=True)
 
 
@@ -268,17 +268,17 @@ class EntryTransaction(models.Model):
 class Entry(models.Model):
     account = models.CharField(max_length=100)
     amount = models.FloatField()
-    category = models.CharField(max_length=100)
+    category = models.CharField(max_length=100, blank=True, null=True)
     completed = models.BooleanField(default=False, blank=True, null=True)
     created = models. DateTimeField()
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     date = models.DateField()
     deleted = models.BooleanField(blank=True, null=True)
-    desc = models.CharField(max_length=3072)
+    desc = models.CharField(max_length=3072, blank=True, null=True)
     extra = models.CharField(max_length=4096, blank=True, null=True)
     id = models.IntegerField(primary_key=True)
     images = models.ManyToManyField('Image', related_name='entry_images', blank=True)
-    importar = models.ForeignKey(EntryImport, on_delete=models.CASCADE, blank=True, null=True)
+    #importar = models.ForeignKey(EntryImport, on_delete=models.CASCADE, blank=True, null=True)
     location = models.ForeignKey(EntryLocation, on_delete=models.CASCADE, blank=True, null=True)
     modified = models.CharField(max_length=100)
     # readonly: Maybe[List[str]] = Property(Array(String()))
