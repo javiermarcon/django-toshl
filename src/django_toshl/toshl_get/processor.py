@@ -6,11 +6,13 @@ import toshling
 from dateutil import tz
 import six
 from dateutil.parser import parse
-from .models import (Account, AccountAvg, AccountBilling, AccountConnection, Currency, AccountMedian, AccountGoal,
-                     AccountSettle, CurrencyElement, Category, Tag, CategoryCounts, TagCounts, Entry, EntryImport,
-                     EntryReview, EntryTransaction)
+from .models import (Account, AccountConnection, Currency, AccountMedian, AccountGoal,
+                     AccountSettle, CurrencyElement, Category, Tag, Entry,
+                     EntryReview, EntryTransaction
+                     #EntryImport, AccountAvg, AccountBilling, #CategoryCounts, #TagCounts,
+                     )
 import pprint
-# import pdb
+import pdb
 
 class EntriesProcessor(object):
     client = None
@@ -80,25 +82,31 @@ class EntriesProcessor(object):
         relatedName = field.related_model.__name__
         #if relatedName not in globals():
         #    pdb.set_trace()
-        relatedModel = globals()[relatedName]
-        relatedModelFields = self.get_fields(relatedModel)
-        relatedPrimary = self.get_primary(relatedModelFields)
-        return (relatedModel, relatedModelFields, relatedPrimary)
+        globalvars = globals()
+        if relatedName in globalvars:
+            relatedModel = globalvars[relatedName]
+            relatedModelFields = self.get_fields(relatedModel)
+            relatedPrimary = self.get_primary(relatedModelFields)
+            return (relatedModel, relatedModelFields, relatedPrimary)
+        # when the related table is not defined
+        print('The model {} was not found.'.format(relatedName))
+        return (None, None, None)
 
     def process_foreign_key_field(self, field, fldValue):
         #print((fldValue, field, "foreign_key"))
         # import pdb;pdb.set_trace()
         (relatedModel, relatedModelFields, relatedPrimary) = self.get_related(field)
         # related_params = dir(fldValue)
-        if not isinstance(fldValue, six.string_types):
-            objValues = {field.name: self.process_fldValue(getattr(fldValue, field.name), field) for field in relatedModelFields if
-                         hasattr(fldValue, field.name)}
-            #for field in relatedModelFields:
-            #    if field.name in objValues and isinstance(field, models.ForeignKey):
-            #        objValues[field.name] = self.process_foreign_key_field(field, objValues[field.name])
-        else:
-            objValues = {relatedPrimary: fldValue}
-        fldValue = self.upsert_record(relatedModel, objValues, relatedPrimary)
+        if relatedModel:
+            if not isinstance(fldValue, six.string_types):
+                objValues = {field.name: self.process_fldValue(getattr(fldValue, field.name), field) for field in relatedModelFields if
+                             hasattr(fldValue, field.name)}
+                #for field in relatedModelFields:
+                #    if field.name in objValues and isinstance(field, models.ForeignKey):
+                #        objValues[field.name] = self.process_foreign_key_field(field, objValues[field.name])
+            else:
+                objValues = {relatedPrimary: fldValue}
+            fldValue = self.upsert_record(relatedModel, objValues, relatedPrimary)
         # import pdb; pdb.set_trace()
         return fldValue
 
@@ -174,7 +182,7 @@ class EntriesProcessor(object):
             print(e)
             import traceback
             traceback.print_exc()
-            #pdb.set_trace()
+            pdb.set_trace()
 
     def process_list_entries(self, entries, action, queryset, fields, primary, m2m_fields):
         params = dir(entries[0])

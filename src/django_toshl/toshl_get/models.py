@@ -42,7 +42,7 @@ class EntryRepeat(models.Model):
     bysetpos = models.CharField(max_length=100)
     count = models.IntegerField() # min = 1
     end = models.DateField()
-    entries = models.ManyToManyField('Entry', related_name='repeated_entries', blank=True, null=True)
+    entries = models.ManyToManyField('Entry', related_name='repeated_entries', blank=True)
     frequency = models.CharField(max_length=20, choices=ENTRIES_REPEAT_FREQ)
     id = models.IntegerField(primary_key=True)
     interval = models.IntegerField() # required=True min 1 max 255
@@ -54,15 +54,15 @@ class EntryRepeat(models.Model):
     type = models.CharField(max_length=20, choices=ENTRIES_REPEAT_TYPES)
 
 
-class AccountAvg(models.Model):
-    expenses = models.FloatField(default=0)
-    incomes = models.FloatField(default=0)
+#class AccountAvg(models.Model):
+#    expenses = models.FloatField(default=0)
+#    incomes = models.FloatField(default=0)
 
 
-class AccountBilling(models.Model):
-    byday = models.CharField(max_length=100, blank=True, null=True)
-    bymonthday = models.CharField(max_length=100, blank=True, null=True)
-    bysetpos = models.CharField(max_length=100, blank=True, null=True)
+#class AccountBilling(models.Model):
+#    byday = models.CharField(max_length=100, blank=True, null=True)
+#    bymonthday = models.CharField(max_length=100, blank=True, null=True)
+#    bysetpos = models.CharField(max_length=100, blank=True, null=True)
 
 
 class AccountConnection(models.Model):
@@ -98,9 +98,9 @@ class AccountSettle(models.Model):
 
 class Account(models.Model):
     id = models.IntegerField(primary_key=True)
-    avg = models.ForeignKey(AccountAvg, on_delete=models.CASCADE, blank=True, null=True)
+    #avg = models.ForeignKey(AccountAvg, on_delete=models.CASCADE, blank=True, null=True)
     balance = models.FloatField()
-    billing = models.ForeignKey(AccountBilling, on_delete=models.CASCADE, blank=True, null=True)
+    #billing = models.ForeignKey(AccountBilling, on_delete=models.CASCADE, blank=True, null=True)
     connection = models.ForeignKey(AccountConnection, on_delete=models.CASCADE, blank=True, null=True)
     count = models.IntegerField()
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
@@ -123,9 +123,9 @@ class Account(models.Model):
 
 
 class BudgetProblem(models.Model):
-    deleted_accounts = models.ManyToManyField('Account', blank=True, null=True)
-    deleted_categories = models.ManyToManyField('Category', blank=True, null=True)
-    deleted_tags = models.ManyToManyField('Tag', blank=True, null=True)
+    deleted_accounts = models.ManyToManyField('Account', blank=True)
+    deleted_categories = models.ManyToManyField('Category', blank=True)
+    deleted_tags = models.ManyToManyField('Tag', blank=True)
     description = models.CharField(max_length=100)
     id = models.IntegerField(primary_key=True)
 
@@ -176,47 +176,47 @@ class Budget(models.Model):
     type = models.CharField(max_length=20, choices=BUDGET_TYPES)
 
 
-class CategoryCounts(models.Model):
-    budgets = models.IntegerField(blank=True, null=True)
-    entries = models.IntegerField(blank=True, null=True)
-    expense_entries = models.IntegerField(blank=True, null=True)
-    expense_tags = models.IntegerField(blank=True, null=True)
-    expense_tags_used_with_category = models.IntegerField(blank=True, null=True)
-    income_entries = models.IntegerField(blank=True, null=True)
-    income_tags = models.IntegerField(blank=True, null=True)
-    income_tags_used_with_category = models.IntegerField(blank=True, null=True)
-    tags = models.IntegerField(blank=True, null=True)
-    tags_used_with_category = models.IntegerField(blank=True, null=True)
+#class CategoryCounts(models.Model):
+#    budgets = models.IntegerField(blank=True, null=True)
+#    entries = models.IntegerField(blank=True, null=True)
+#    expense_entries = models.IntegerField(blank=True, null=True)
+#    expense_tags = models.IntegerField(blank=True, null=True)
+#    expense_tags_used_with_category = models.IntegerField(blank=True, null=True)
+#    income_entries = models.IntegerField(blank=True, null=True)
+#    income_tags = models.IntegerField(blank=True, null=True)
+#    income_tags_used_with_category = models.IntegerField(blank=True, null=True)
+#    tags = models.IntegerField(blank=True, null=True)
+#    tags_used_with_category = models.IntegerField(blank=True, null=True)
 
 
 class Category(models.Model):
-    counts = models.ForeignKey(CategoryCounts, on_delete=models.CASCADE, blank=True, null=True)
+    #counts = models.ForeignKey(CategoryCounts, on_delete=models.CASCADE, blank=True, null=True)
     deleted = models.BooleanField(blank=True, null=True)
     extra = models.CharField(max_length=4096, blank=True, null=True)
-    id = models.IntegerField(primary_key=True)
+    id = models.CharField(max_length=100, primary_key=True)
     modified = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
     name_override = models.BooleanField(default=False, blank=True, null=True)
     type = models.CharField(max_length=20, choices=CATEGORY_TYPES)
 
 
-class CategorySumExpenses(models.Model):
-    count = models.IntegerField() # minimum=0), required=True)
-    sum = models.FloatField()
+#class CategorySumExpenses(models.Model):
+#    count = models.IntegerField() # minimum=0), required=True)
+#    sum = models.FloatField()
 
 
-class CategorySumIncomes(models.Model):
-    count = models.IntegerField() # minimum=0), required=True)
-    sum = models.FloatField()
+#class CategorySumIncomes(models.Model):
+#    count = models.IntegerField() # minimum=0), required=True)
+#    sum = models.FloatField()
 
 
-class CategorySum(models.Model):
-    category = models.CharField(max_length=100)
-    category_name = models.CharField(max_length=100)
-    category_type = models.CharField(max_length=20, choices=CATEGORY_TYPES)
-    expenses = models.ForeignKey(CategorySumExpenses, on_delete=models.CASCADE, blank=True, null=True)
-    incomes = models.ForeignKey(CategorySumIncomes, on_delete=models.CASCADE, blank=True, null=True)
-    modified = models.CharField(max_length=100)
+#class CategorySum(models.Model):
+#    category = models.CharField(max_length=100)
+#    category_name = models.CharField(max_length=100)
+#    category_type = models.CharField(max_length=20, choices=CATEGORY_TYPES)
+#    expenses = models.ForeignKey(CategorySumExpenses, on_delete=models.CASCADE, blank=True, null=True)
+#    incomes = models.ForeignKey(CategorySumIncomes, on_delete=models.CASCADE, blank=True, null=True)
+#    modified = models.CharField(max_length=100)
 
 
 class EntryImage(models.Model):
@@ -350,14 +350,14 @@ class Day(models.Model):
 #     type = models.CharField(max_length=20, choices=['export', 'attachments', 'user_data']))
 
 
-class Expenses(models.Model):
-    count = models.IntegerField() # minimum=0))
-    sum = models.FloatField()
+#class Expenses(models.Model):
+#    count = models.IntegerField() # minimum=0))
+#    sum = models.FloatField()
 
 
-class Incomes(models.Model):
-    count = models.IntegerField() # Integer(minimum=0))
-    sum = models.FloatField()
+#class Incomes(models.Model):
+#    count = models.IntegerField() # Integer(minimum=0))
+#    sum = models.FloatField()
 
 
 class Location(models.Model):
@@ -365,9 +365,9 @@ class Location(models.Model):
     amount = models.FloatField()
     chain_id = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
-    expenses = models.ForeignKey(Expenses, on_delete=models.CASCADE, blank=True, null=True)
+    #expenses = models.ForeignKey(Expenses, on_delete=models.CASCADE, blank=True, null=True)
     id = models.IntegerField(primary_key=True)
-    incomes = models.ForeignKey(Incomes, on_delete=models.CASCADE, blank=True, null=True)
+    #incomes = models.ForeignKey(Incomes, on_delete=models.CASCADE, blank=True, null=True)
     latitude = models.FloatField()
     longitude = models.FloatField()
     modified = models.CharField(max_length=100)
@@ -377,15 +377,15 @@ class Location(models.Model):
     visits = models.IntegerField() # minimum=0))
 
 
-class TagCounts(models.Model):
-    budgets = models.IntegerField() # required=True)
-    entries = models.IntegerField() # required=True)
-    unsorted_entries = models.IntegerField()
+#class TagCounts(models.Model):
+#    budgets = models.IntegerField() # required=True)
+#    entries = models.IntegerField() # required=True)
+#    unsorted_entries = models.IntegerField()
 
 
 class Tag(models.Model):
     category = models.CharField(max_length=100)
-    counts = models.ForeignKey(TagCounts, on_delete=models.CASCADE, blank=True, null=True)
+    #counts = models.ForeignKey(TagCounts, on_delete=models.CASCADE, blank=True, null=True)
     deleted = models.BooleanField(blank=True, null=True)
     extra = models.CharField(max_length=4096, blank=True, null=True)
     id = models.IntegerField(primary_key=True)
