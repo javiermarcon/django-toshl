@@ -1,10 +1,9 @@
-from django_tables2.config import RequestConfig
 from django.shortcuts import render
-from .processor import do_processing
-from .tables import CurrencyElementTable
 from django_tables2.config import RequestConfig
 from django_tables2.export.export import TableExport
-from .models import CurrencyElement
+from .processor import do_processing
+from .tables import CurrencyElementTable, AccountTable
+from .models import CurrencyElement, Account
 # Create your views here.
 
 
@@ -63,8 +62,12 @@ def currencyElement_view(request):
     title = 'Listado de divisas'
     return table_view(request, table, title)
 
-
-
+def account_view(request):
+    ''' view the currencies '''
+    # TODO: ver django-filter para filtrar los datos que se muestran en la tabla
+    table = AccountTable(Account.objects.all())
+    title = 'Listado de cuentas'
+    return table_view(request, table, title)
 
 
 """

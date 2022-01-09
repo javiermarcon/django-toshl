@@ -7,5 +7,6 @@ urlpatterns = [
     path('toshl/transactions/import/', views.transactions_import),
     path('toshl/all/import/', views.all_import),
 
-    path('toshl/currencies/view/', views.currencyElement_view)
+    path('toshl/currencies/view/', views.currencyElement_view),
+    path('toshl/accounts/view/', views.account_view),
     ]
