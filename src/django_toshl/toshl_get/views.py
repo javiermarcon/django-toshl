@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from .processor import do_processing
-
+from .tables import CurrencyElementTable
+from django_tables2 import SingleTableView
+from .models import CurrencyElement
 # Create your views here.
 
 def render_imported(request):
@@ -37,6 +39,16 @@ def all_import(request):
     transaction_params = {'from_': '2000-01-01', 'to': '2022-12-01'}
     params = [None, None, None, None, transaction_params]
     return process_and_render(request, actions, params)
+
+
+def currencyElement_view(request):
+    ''' view the currencies '''
+    table = CurrencyElementTable(CurrencyElement.objects.all())
+    table.order_by = request.GET.get('sort', ('type', 'code'))
+    table.paginate(page=request.GET.get('page', 1), per_page=20)
+    return render(request, 'toshl_get/table_view.html', {
+        'table': table, 'title': 'Listado de divisas'
+    })
 
 
 """
