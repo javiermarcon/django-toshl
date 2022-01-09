@@ -9,4 +9,7 @@ urlpatterns = [
 
     path('toshl/currencies/view/', views.currencyElement_view),
     path('toshl/accounts/view/', views.account_view),
+    path('toshl/categories/view/', views.category_view),
+    path('toshl/tags/view/', views.tag_view),
+    path('toshl/transactions/view/', views.transaction_view),
     ]

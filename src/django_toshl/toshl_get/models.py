@@ -274,7 +274,7 @@ class Entry(models.Model):
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, blank=True, null=True)
     date = models.DateField()
     deleted = models.BooleanField(blank=True, null=True)
-    desc = models.CharField(max_length=3072, blank=True, null=True)
+    desc = models.CharField(max_length=3072, blank=True, null=True, verbose_name=('Descripción'))
     extra = models.CharField(max_length=4096, blank=True, null=True)
     id = models.IntegerField(primary_key=True)
     images = models.ManyToManyField('Image', related_name='entry_images', blank=True)

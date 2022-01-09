@@ -2,8 +2,8 @@ from django.shortcuts import render
 from django_tables2.config import RequestConfig
 from django_tables2.export.export import TableExport
 from .processor import do_processing
-from .tables import CurrencyElementTable, AccountTable
-from .models import CurrencyElement, Account
+from .tables import CurrencyElementTable, AccountTable, CategoryTable, TagTable, EntryTable
+from .models import CurrencyElement, Account, Category, Tag, Entry
 # Create your views here.
 
 
@@ -44,6 +44,8 @@ def all_import(request):
 
 
 def table_view(request, table, title):
+    ''' Muestra una tabla y permite exportarla'''
+    # TODO: ver django-filter para filtrar los datos que se muestran en la tabla
     RequestConfig(request, paginate={"per_page": 20}).configure(table)
     # para exportar en formatos
     export_format = request.GET.get("_export", None)
@@ -57,16 +59,36 @@ def table_view(request, table, title):
 
 def currencyElement_view(request):
     ''' view the currencies '''
-    # TODO: ver django-filter para filtrar los datos que se muestran en la tabla
-    table = CurrencyElementTable(CurrencyElement.objects.all())
+    table = CurrencyElementTable(CurrencyElement.objects.all(), order_by="type, code")
     title = 'Listado de divisas'
     return table_view(request, table, title)
 
+
 def account_view(request):
     ''' view the currencies '''
-    # TODO: ver django-filter para filtrar los datos que se muestran en la tabla
-    table = AccountTable(Account.objects.all())
+    table = AccountTable(Account.objects.all(), order_by="name")
     title = 'Listado de cuentas'
+    return table_view(request, table, title)
+
+
+def category_view(request):
+    ''' view the currencies '''
+    table = CategoryTable(Category.objects.all(), order_by="type, name")
+    title = 'Listado de categorías'
+    return table_view(request, table, title)
+
+
+def tag_view(request):
+    ''' view the currencies '''
+    table = TagTable(Tag.objects.all(), order_by="type, category, name")
+    title = 'Listado de etiquetas'
+    return table_view(request, table, title)
+
+
+def transaction_view(request):
+    ''' view the currencies '''
+    table = EntryTable(Entry.objects.all(), order_by="date")
+    title = 'Listado de transacciones'
     return table_view(request, table, title)
 
 
