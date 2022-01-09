@@ -44,10 +44,7 @@ def all_import(request):
     return process_and_render(request, actions, params)
 
 
-def currencyElement_view(request):
-    ''' view the currencies '''
-    # TODO: ver django-filter para filtrar los datos que se muestran en la tabla
-    table = CurrencyElementTable(CurrencyElement.objects.all())
+def table_view(request, table, title):
     RequestConfig(request, paginate={"per_page": 20}).configure(table)
     # para exportar en formatos
     export_format = request.GET.get("_export", None)
@@ -55,8 +52,19 @@ def currencyElement_view(request):
         exporter = TableExport(export_format, table)
         return exporter.response("table.{}".format(export_format))
     return render(request, 'toshl_get/table_view.html', {
-        'table': table, 'title': 'Listado de divisas'
+        'table': table, 'title': title
     })
+
+
+def currencyElement_view(request):
+    ''' view the currencies '''
+    # TODO: ver django-filter para filtrar los datos que se muestran en la tabla
+    table = CurrencyElementTable(CurrencyElement.objects.all())
+    title = 'Listado de divisas'
+    return table_view(request, table, title)
+
+
+
 
 
 """
