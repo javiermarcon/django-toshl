@@ -1,9 +1,12 @@
+from django_tables2.config import RequestConfig
 from django.shortcuts import render
 from .processor import do_processing
 from .tables import CurrencyElementTable
-from django_tables2 import SingleTableView
+from django_tables2.config import RequestConfig
+from django_tables2.export.export import TableExport
 from .models import CurrencyElement
 # Create your views here.
+
 
 def render_imported(request):
     ''' Imports the accounts'''
@@ -43,9 +46,14 @@ def all_import(request):
 
 def currencyElement_view(request):
     ''' view the currencies '''
+    # TODO: ver django-filter para filtrar los datos que se muestran en la tabla
     table = CurrencyElementTable(CurrencyElement.objects.all())
-    table.order_by = request.GET.get('sort', ('type', 'code'))
-    table.paginate(page=request.GET.get('page', 1), per_page=20)
+    RequestConfig(request, paginate={"per_page": 20}).configure(table)
+    # para exportar en formatos
+    export_format = request.GET.get("_export", None)
+    if TableExport.is_valid_format(export_format):
+        exporter = TableExport(export_format, table)
+        return exporter.response("table.{}".format(export_format))
     return render(request, 'toshl_get/table_view.html', {
         'table': table, 'title': 'Listado de divisas'
     })

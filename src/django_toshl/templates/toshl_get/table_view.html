@@ -8,7 +8,18 @@
     <title>{{ title }}</title>
 </head>
 <body>
-<h1> {{ title }} </h1>
+    <h1> {{ title }} </h1>
     {% render_table table %}
+
+Exportar:
+    <a href="{{ request.path }}?_export=csv">csv</a>
+    <a href="{{ request.path }}?_export=json">json</a>
+    <a href="{{ request.path }}?_export=latex">latex</a>
+    <a href="{{ request.path }}?_export=ods">ods</a>
+    <a href="{{ request.path }}?_export=tsv">tsv</a>
+    <a href="{{ request.path }}?_export=xls">xls</a>
+    <a href="{{ request.path }}?_export=xlsx">xlsx</a>
+    <a href="{{ request.path }}?_export=yaml">yaml</a>
+
 </body>
 </html>
