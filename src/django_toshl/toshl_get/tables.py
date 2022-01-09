@@ -8,7 +8,9 @@ class CurrencyElementTable(tables.Table):
 
 
 class AccountTable(tables.Table):
+    currency = tables.Column(accessor='currency.code.code')
+    connection = tables.Column(accessor='connection.name')
     class Meta:
         model = Account
-        sequence = ('id', 'name', 'currency','balance')
-        exclude = ('daily_sum_median', 'order')
+        sequence = ('id', 'name', 'currency','balance', 'connection')
+        exclude = ('daily_sum_median', 'order', )
